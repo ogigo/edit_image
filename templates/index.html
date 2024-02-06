@@ -1,0 +1,36 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload App</title>
+</head>
+<body>
+    <h1>Image Upload App</h1>
+    
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    {% if resized_image %}
+        <h2>Resized Original Image</h2>
+        <img src="{{ url_for('uploaded_file', filename=resized_image) }}" alt="Resized Original Image">
+    {% endif %}
+
+    {% if resized_blurred_image %}
+        <h2>Resized Blurred Image</h2>
+        <img src="{{ url_for('uploaded_file', filename=resized_blurred_image) }}" alt="Resized Blurred Image">
+    {% endif %}
+</body>
+</html>
+
+
+
+
+
