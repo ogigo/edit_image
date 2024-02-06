@@ -1,0 +1,75 @@
+import os
+import cv2
+from flask import Flask, render_template, request
+from flask import send_from_directory
+from werkzeug.utils import secure_filename
+
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory('uploads', filename)
+
+
+
+@app.route('/', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return render_template('index.html', message='No file part')
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return render_template('index.html', message='No selected file')
+
+    # Secure the filename before saving
+    filename = secure_filename(file.filename)
+    file_path = os.path.join('uploads', filename)
+    file.save(file_path)
+
+    # Resize the image
+    img = cv2.imread(file_path)
+    resized_img = cv2.resize(img, (512,512))
+    resized_file_path = os.path.join('uploads', 'resized_' + filename)
+    cv2.imwrite(resized_file_path, resized_img)
+
+    return render_template('index.html', message='File uploaded successfully', image_url=f"resized_{filename}")
+
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload App</title>
+</head>
+<body>
+    <h1>Image Upload App</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    {% if image_url %}
+        <h2>Uploaded Image</h2>
+        <img src="{{ url_for('uploaded_file', filename=image_url) }}" alt="Uploaded Image">
+
+    {% endif %}
+</body>
+</html
